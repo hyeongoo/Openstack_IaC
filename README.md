@@ -7,7 +7,7 @@
 # 디렉토리 구조
 ```
 /root/terraform/
-├── modules/               # 기존 모듈들은 여기에 모아둡니다.
+├── modules/
 │   ├── network/           # - vpc, subnet, rbac 설정 등
 │   │   ├── main.tf
 │   │   ├── outputs.tf
