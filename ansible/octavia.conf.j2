@@ -1,0 +1,78 @@
+[DEFAULT]
+transport_url = {{ neutron_transport_url }}
+
+[api_settings]
+bind_host = 0.0.0.0
+bind_port = 9876
+auth_strategy = keystone
+
+[controller_worker]
+amp_image_id = {{ amphora_image_id }}
+amp_image_tag = amphora
+amp_flavor_id = {{ terraform_out_flavor_id }}
+amp_boot_network_list = {{ terraform_out_net_id }}
+amp_secgroup_list = {{ terraform_out_sg_id }}
+
+loadbalancer_topology = SINGLE
+network_driver = allowed_address_pairs_driver
+compute_driver = compute_nova_driver
+amphora_driver = amphora_haproxy_rest_driver
+
+client_ca = /etc/octavia/certs/client_ca.cert.pem
+server_ca = /etc/octavia/certs/server_ca.cert.pem
+cleanup_failed_amphora = False
+
+[haproxy_amphora]
+base_path = /var/lib/octavia
+base_amp_path = /var/lib/octavia
+
+[service_auth]
+auth_url = http://{{ controller_external_ip }}:5000/v3
+memcached_servers = {{ controller_external_ip }}:11211
+user_domain_name = Default
+project_domain_name = Default
+project_name = {{ octavia_project_name }}
+username = octavia
+password = octavia
+auth_type = password
+
+[keystone_authtoken]
+www_authenticate_uri = http://{{ controller_external_ip }}:5000
+auth_url = http://{{ controller_external_ip }}:5000
+auth_type = password
+project_domain_name = Default
+user_domain_name = Default
+project_name = {{ octavia_project_name }}
+username = octavia
+password = octavia
+
+[health_manager]
+bind_ip = {{ ohm0_ip }}
+bind_port = 10514
+controller_ip_port_list = {{ ohm0_ip }}:10514
+heartbeat_key = health_check_123
+
+[database]
+connection = mysql+pymysql://octavia:octavia@{{ controller_external_ip }}/octavia
+
+[certificates]
+ca_certificate = /etc/octavia/certs/server_ca.cert.pem
+ca_private_key = /etc/octavia/certs/server_ca.key.pem
+ca_private_key_passphrase = not-secure-passphrase
+client_certificate = /etc/octavia/certs/client.cert-and-key.pem
+ca_value_certificate = /etc/octavia/certs/client_ca.cert.pem
+
+[glance]
+auth_section = service_auth
+
+[networking_basic]
+auth_section = service_auth
+
+[nova]
+auth_section = service_auth
+
+[taskflow]
+persistence_connection = mysql+pymysql://octavia:octavia@{{ controller_external_ip }}/octavia
+
+[amphora_agent]
+amphora_udp_driver = oort_udp_drivers

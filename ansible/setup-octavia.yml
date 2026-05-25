@@ -1,0 +1,69 @@
+---
+- name: Finalize Octavia Infrastructure Automation (Full Automation Mode)
+  hosts: localhost
+  become: yes
+  vars_files:
+    - tf_vars.yml
+  vars:
+    # 외부 통신용 (br-ex) IP 추출
+    controller_external_ip: "{{ hostvars['localhost']['ansible_br_ex']['ipv4']['address'] }}"
+    # Health Manager용 고정 IP
+    ohm0_ip: "192.168.100.5"
+    # 프로젝트 이름
+    octavia_project_name: "services"
+
+  tasks:
+    - name: Dynamically extract transport_url from neutron.conf
+      shell: grep "^transport_url\s*=" /etc/neutron/neutron.conf | cut -d'=' -f2- | tr -d ' '
+      register: extracted_url
+
+    - name: Dynamically get Amphora Image ID from Glance
+      shell: |
+        source /root/keystonerc_admin && openstack image list --name amphora-caracal-haproxy -f value -c ID
+      register: extracted_image_id
+      args:
+        executable: /bin/bash
+
+    - name: Set facts for template
+      set_fact:
+        neutron_transport_url: "{{ extracted_url.stdout }}"
+        amphora_image_id: "{{ extracted_image_id.stdout }}"
+
+    - name: Deploy Octavia Configuration from Template
+      template:
+        src: ./octavia.conf.j2
+        dest: /etc/octavia/octavia.conf
+        owner: octavia
+        group: octavia
+        mode: '0640'
+
+    - name: Configure o-hm0 interface with automatic iface-id
+      shell: |
+        # 1. 테라폼이 생성한 포트의 실제 UUID를 실시간으로 추출
+        LB_PORT_ID=$(source /root/keystonerc_admin && openstack port show octavia-health-manager-port -f value -c id)
+
+        # 2. OVS 포트 생성 및 MAC 주소, iface-id 주입
+        ovs-vsctl --may-exist add-port br-int o-hm0 -- set Interface o-hm0 type=internal \
+          other_config:hwaddr={{ terraform_out_mac }} \
+          external-ids:iface-id=$LB_PORT_ID
+
+        # 3. 네트워크 인터페이스 활성화 및 경로 설정
+        ip link set o-hm0 up
+        ip addr replace {{ ohm0_ip }}/24 dev o-hm0
+        ip route replace 192.168.100.0/24 dev o-hm0
+      register: ohm0_result
+      changed_when: false
+
+    - name: Run Octavia DB Migration
+      shell: octavia-db-manage --config-file /etc/octavia/octavia.conf upgrade head
+
+    - name: Ensure Octavia services are restarted
+      systemd:
+        name: "{{ item }}"
+        state: restarted
+        enabled: yes
+      loop:
+        - octavia-api
+        - octavia-health-manager
+        - octavia-housekeeping
+        - octavia-worker

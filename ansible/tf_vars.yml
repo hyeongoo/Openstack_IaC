@@ -1,0 +1,7 @@
+# terraform의 infra/ansible_vars.tf에 의해 생성되는 파일 변수는 실제 id로 치환됨
+terraform_out_flavor_id: "${module.compute.amphora_flavor_id}"
+terraform_out_net_id: "${module.network.lb_mgmt_net_id}"
+terraform_out_sg_id: "${module.security.lb_mgmt_sg_id}"
+terraform_out_mac: "${module.network.hm_port_mac}"
+proxy_fip: "${module.compute.instance_1_ip}"
+instance_2_ip: "${module.compute.instance_2_ip}"

@@ -1,0 +1,1 @@
+output "loadbalancer_public_vip" { value = module.web_lb.lb_vip }

@@ -1,0 +1,9 @@
+output "subnet_1_id" { value = openstack_networking_subnet_v2.subnet_1.id }
+output "subnet_2_id" { value = openstack_networking_subnet_v2.subnet_2.id }
+output "network_1_id" { value = openstack_networking_network_v2.network_1.id }
+output "network_2_id" { value = openstack_networking_network_v2.network_2.id }
+output "router_int_2_id" { value = openstack_networking_router_interface_v2.int_2.id }
+output "external_net_name" { value = data.openstack_networking_network_v2.external_net.name }
+output "lb_mgmt_port_id" { value = openstack_networking_port_v2.octavia_hm_port.id }
+output "hm_port_mac" { value = openstack_networking_port_v2.octavia_hm_port.mac_address }
+output "lb_mgmt_net_id" { value = openstack_networking_network_v2.lb_mgmt_net.id }
