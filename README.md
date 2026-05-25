@@ -5,6 +5,7 @@
 ![오픈스택 아키텍처 다이어그램](picture/오픈스택_아키텍처_다이어그램.png)
 
 # 디렉토리 구조
+```
 /root/terraform/
 ├── modules/               # 기존 모듈들은 여기에 모아둡니다.
 │   ├── network/           # - vpc, subnet, rbac 설정 등
@@ -33,7 +34,8 @@
 └── loadbalancer/          # [2단계 실행] 로드밸런서 구축용
     ├── main.tf            # - loadbalancer 모듈 호출
     └── providers.tf       # - 오픈스택 접속 설정
-
+```
+```
 /root/ansible/
 ├── ansible.cfg            # 앤서블 기본 환경 설정 파일 (호스트 키 확인 비활성화 등)
 ├── hosts.ini              # 테라폼에 의해 자동 생성되는 인벤토리 파일 (Proxy 및 Backend 서버 접속 정보)
@@ -42,6 +44,7 @@
 ├── setup-octavia.yml      # Octavia 로드밸런서 인프라 구축 및 자동화를 완료하는 플레이북
 ├── setup-web.yml          # 프록시 및 백엔드 서버에 Nginx를 설치하고 연동하는 웹서버 설정 플레이북
 └── tf_vars.yml            # 테라폼 실행 결과(IP, MAC, Flavor ID 등)를 앤서블 변수로 저장한 파일
+```
 
 # 실행 순서
 1. 기반 인프라 생성
