@@ -1,6 +1,6 @@
 # 1. 네트워크 모듈 호출
 module "network" {
-  source = "../modules/network" # 경로가 ../modules로 변경되었습니다.
+  source = "../modules/network"
   providers = {
     openstack = openstack
     openstack.services = openstack.services
@@ -9,7 +9,7 @@ module "network" {
 
 # 2. 보안 그룹 모듈 호출
 module "security" {
-  source = "../modules/security" # 경로가 ../modules로 변경되었습니다.
+  source = "../modules/security"
   providers = {
     openstack = openstack
     openstack.services = openstack.services
@@ -18,9 +18,9 @@ module "security" {
 
 # 3. 컴퓨트 모듈 호출 (인스턴스 생성)
 module "compute" {
-  source = "../modules/compute" # 경로가 ../modules로 변경되었습니다.
+  source = "../modules/compute"
 
-  # network/security 모듈의 output을 전달 (기존 PDF 1페이지 내용 반영)
+  # network/security 모듈의 output을 전달
   network_1_id      = module.network.network_1_id
   network_2_id      = module.network.network_2_id
   router_int_2_id   = module.network.router_int_2_id
